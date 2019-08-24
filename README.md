@@ -1,5 +1,9 @@
 # Hyperledger20 스터디 모임
 
+
+# 190824 회의록
+
+
 # 190714 회의록
 온라인 스터디 계획 및 오프 모임 일정
 1. Building Your First Network:박진환, 이영준(7/27:5시)
