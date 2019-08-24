@@ -2,6 +2,11 @@
 
 
 # 190824 회의록
+- Upgrading Your Network Components : 박진환, 이영준
+- Adding an Org to a Channel : 최규남
+- Using Private Data in Fabric : 전부현
+
+- 오프 세미나 : 9/21 14시
 
 
 # 190714 회의록
