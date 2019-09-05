@@ -1,0 +1,130 @@
+Token
+https://github.com/pjt3591oo/blockchain-book
+
+sudo su
+
+{
+source /etc/profile
+(source ~/.profile)
+docker rm -f $(docker ps -aq)
+}
+
+cd $FABRIC_HOME/fabric-samples/chaincode
+mkdir token
+chmod -R 777 ./token
+cd token
+gedit token.go
+
+cd $FABRIC_HOME/fabric-samples
+mkdir token
+chmod -R 777 ./token
+source /etc/profile
+export FABRIC_CFG_PATH=$FABRIC_HOME/fabric-samples/token
+source /etc/profile
+cd $FABRIC_CFG_PATH
+
+gedit startToken.sh
+
+mkdir javascript
+chmod -R 777 ./javascript
+cd javascript
+
+gedit enrollAdmin.js
+gedit registerUser.js
+gedit query.js
+gedit invoke.js
+gedit package.json
+
+Launch the network
+cd $FABRIC_CFG_PATH
+chmod -R 777 startToken.sh
+./startToken.sh
+# don't rewrite paths for Windows Git Bash users
+export MSYS_NO_PATHCONV=1
+
+docker-compose -f docker-compose.yml down
+Removing network net_basic
+WARNING: Network net_basic not found.
+
+docker-compose -f docker-compose.yml up -d ca.example.com orderer.example.com peer0.org1.example.com couchdb
+Creating network "net_basic" with the default driver
+Creating orderer.example.com ... done
+Creating couchdb             ... done
+Creating ca.example.com      ... done
+Creating peer0.org1.example.com ... done
+
+# wait for Hyperledger Fabric to start
+# incase of errors when running later commands, issue export FABRIC_START_TIMEOUT=<larger number>
+export FABRIC_START_TIMEOUT=10
+#echo ${FABRIC_START_TIMEOUT}
+sleep ${FABRIC_START_TIMEOUT}
+
+# Create the channel
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel create -o orderer.example.com:7050 -c mychannel -f /etc/hyperledger/configtx/channel.tx
+2019-08-18 17:40:03.599 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2019-08-18 17:40:03.673 UTC [cli.common] readBlock -> INFO 002 Received block: 0
+# Join peer0.org1.example.com to the channel.
+docker exec -e "CORE_PEER_LOCALMSPID=Org1MSP" -e "CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/msp/users/Admin@org1.example.com/msp" peer0.org1.example.com peer channel join -b mychannel.block
+2019-08-18 17:40:04.108 UTC [channelCmd] InitCmdFactory -> INFO 001 Endorser and orderer connections initialized
+2019-08-18 17:40:04.304 UTC [channelCmd] executeJoin -> INFO 002 Successfully submitted proposal to join channel
+Creating cli ... done
+2019-08-18 17:40:06.170 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-08-18 17:40:06.170 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+2019-08-18 17:40:06.843 UTC [chaincodeCmd] install -> INFO 003 Installed remotely response:<status:200 payload:"OK" > 
+2019-08-18 17:40:07.279 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 001 Using default escc
+2019-08-18 17:40:07.279 UTC [chaincodeCmd] checkChaincodeCmdParams -> INFO 002 Using default vscc
+
+                                                                                            3 minutes ago       Up 3 minutes        0.0.0.0:7050->7050/tcp                           orderer.example.com
+Install the application
+cd javascript
+
+chmod -R 777 enrollAdmin.js
+chmod -R 777 registerUser.js
+chmod -R 777 query.js
+chmod -R 777 invoke.js
+chmod -R 777 package.json
+exit
+cd ~/fabric-samples/token/javascript/
+
+npm install
+
+Enrolling the admin user
+
+node enrollAdmin.js
+Wallet path: /home/fabric/fabric-samples/token/javascript/wallet
+Successfully enrolled admin user "admin" and imported it into the wallet
+
+Register and enroll user
+
+node registerUser.js
+Wallet path: /home/fabric/fabric-samples/token/javascript/wallet
+Successfully registered and enrolled admin user "user1" and imported it into the wallet
+
+Querying the ledger
+
+node query.js
+Wallet path: /home/fabric/fabric-samples/token/javascript/wallet
+Transaction has been evaluated, result is: {"name":"ParkJeongTae","symbol":"PJT","totalsupply":10000000}
+*Token information: const result = await contract.evaluateTransaction('getTokenInfo', 'ParkJeongTae');
+
+Updating the ledger
+
+node invoke.js
+Wallet path: /home/fabric/fabric-samples/token/javascript/wallet
+Transaction has been submitted
+*Burn token: await contract.submitTransaction('burn', 'ParkJeongTae', '10000');
+
+node query.js
+Wallet path: /home/fabric/fabric-samples/token/javascript/wallet
+Transaction has been evaluated, result is: {"name":"ParkJeongTae","symbol":"PJT","totalsupply":9990000}
+
+*gedit query.js
+Admin's total token amount: const result = await contract.evaluateTransaction('getBalamceOf', 'ParkJeongTae');
+*gedit invoke.js
+Admin send token 30000 to User: await contract.submitTransaction('transfer', 'ADMIN', 'User', '30000');
+
+cd ../../basic-network/
+
+sudo su
+./stop.sh
+./teardown.sh

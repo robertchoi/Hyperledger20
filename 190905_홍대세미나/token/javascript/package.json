@@ -1,0 +1,14 @@
+{
+    "name": "token",
+    "version": "1.0.0",
+    "description": "Token application",
+    "engines": {
+        "node": ">=8",
+        "npm": ">=5"
+    },
+    "engineStrict": true,
+    "dependencies": {
+        "fabric-ca-client": "~1.4.0",
+        "fabric-network": "~1.4.0"
+    }
+}
